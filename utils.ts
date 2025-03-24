@@ -61,6 +61,7 @@ export class logger {
 export interface Blacklisted {
     ID: string;
     time: number;
+    again:number;
 }
 
 export interface Walo {
