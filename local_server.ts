@@ -1,9 +1,9 @@
 import sql from 'npm:mssql';
-import { logger, sleep } from './utils.js';
+import { logger, sleep } from './utils.ts';
 
 
 
-let localPool;
+let localPool:sql.ConnectionPool;
 let connected = false;
 
 export async function connectLocalServer() {
@@ -34,18 +34,18 @@ export async function connectLocalServer() {
 
 }
 
-export async function findById( id) {
+export async function findById( id:string) {
   try {
     const res = await localPool
       .request()
       .query(`SELECT * FROM PLU WHERE ID = ${id}`);
     return res.recordset;
   } catch (err) {
-    logger.error("❌ Errore in findById:", err);
+    logger.error(`❌ Errore in findById: ${err}`);
   }
 }
 
-export async function updateById( id, title, price) {
+export async function updateById( id:string, title:string, price:string) {
   try {
     logger.info(`🔄 Aggiornamento ID ${id}: ${title}, ${price}`);
 
@@ -70,11 +70,11 @@ export async function updateById( id, title, price) {
       logger.info("⚠️ Nessuna riga aggiornata, rollback eseguito");
     }
   } catch (err) {
-    logger.error("❌ Errore in updateById:", err);
+    logger.error(`❌ Errore in updateById: ${err}`);
   }
 }
 
-export async function stopById( id) {
+export async function stopById( id:string) {
   try {
     logger.info(`🛑 Fermando ID ${id}`);
 
@@ -99,7 +99,7 @@ export async function stopById( id) {
       logger.info("⚠️ Nessuna riga modificata, rollback eseguito");
     }
   } catch (err) {
-    logger.error("❌ Errore in stopById:", err);
+    logger.error(`❌ Errore in stopById: ${err}`);
   }
 }
 

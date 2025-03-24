@@ -1,10 +1,11 @@
 import sql from 'npm:mssql';
-import { logger, sleep } from './utils.js';
+import { logger, sleep, Walo } from './utils.ts';
 
 
-let externalPool;
+let externalPool:sql.ConnectionPool;
+
 let connected = false;
-export async function connectExteralServer(server) {
+export async function connectExteralServer(server:string) {
   const config = {
     user: "bizerba",
     password: "desio172",
@@ -33,7 +34,7 @@ export async function connectExteralServer(server) {
   
 }
 
-export async function getWalos() {
+export async function getWalos():Promise<Walo[] | null> {
   try {
     const walos = await externalPool
       .request()
@@ -41,7 +42,9 @@ export async function getWalos() {
     
     return walos.recordset;
   } catch (err) {
-    logger.err("❌ Errore di connessione:", err);
+    logger.error(`❌ Errore di connessione: ${err}`);
+
+    return null;
   }
 }
 

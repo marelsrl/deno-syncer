@@ -1,14 +1,15 @@
 // Importazioni con require
-import { writeFileSync, readFileSync, appendFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import chalk from 'npm:chalk';
 
-export function createBlacklist(lista) {
+export function createBlacklist(lista:string[]) {
     writeFileSync("blacklist.txt", `${lista.join(',')}`);
 }
 
 let firstTime = true;
-let blacklist = [];
-export function filterWalos(lista) {
+let blacklist:string[] = [];
+
+export function filterWalos(lista:Walo[]):Walo[] {
     if(!firstTime){
         return lista.filter(item => !blacklist.includes(item.ID));
     }else{
@@ -22,7 +23,7 @@ export function filterWalos(lista) {
 
 }
 
-export function sleep(seconds) {
+export function sleep(seconds:number) {
     return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
@@ -30,26 +31,40 @@ const getTimestamp = () => new Date().toLocaleString();
 
 
 export class logger {
-    static info(message) {
+  // deno-lint-ignore no-explicit-any
+    static info(message:any) {
       console.log(
         chalk.white.bold(`${getTimestamp()} [INFO]  - `, logger.formatMessage(message)) +
           chalk.reset()
       )
     }
-  
-    static error(message) {
+  // deno-lint-ignore no-explicit-any
+    static error(message:any) {
       const errorMessage = `${getTimestamp()} [ERROR] - ${logger.formatMessage(message)}\n`
       console.log(chalk.red.bold(errorMessage) + chalk.reset())
       }
-  
-    static success(message) {
+  // deno-lint-ignore no-explicit-any
+    static success(message:any) {
       console.log(
         chalk.green.bold(`${getTimestamp()} [SUCCESS] - `, logger.formatMessage(message)) +
           chalk.reset()
       )
     }
     
-  static formatMessage(message) {
+  // deno-lint-ignore no-explicit-any
+  static formatMessage(message:any) {
     return typeof message === 'string' ? message : JSON.stringify(message, null, 2)
   }
+}
+
+
+export interface Blacklisted {
+    ID: string;
+    time: number;
+}
+
+export interface Walo {
+    ID: string;
+    TESTO1:string
+     PREZZO:string
 }
