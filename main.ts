@@ -23,17 +23,18 @@ async function main() {
     // const ids = walos!.map((x: Walo) => x.ID);
 
     // if (makeBlacklist) {
-    // createBlacklist(ids); // ! da decommentare
+    // createBlacklist(ids);
     // }
     // await sleep(5);
 
-    setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000);
+    setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000) // ! Controllo della blacklist ogni 11 secondi
 
     while (true) {
-      const changed: Walo[] | null = await external.getWalos()!;
-      const oks: Walo[] = filterWalos(changed!);
+      const changed: Walo[] | null = await external.getWalos()!; // prendere i walos
+      // const oks: Walo[] = filterWalos(changed!); //
 
-      for (const item of oks) {
+      
+      for (const item of changed!) {
         const { ID } = item;
         const found: Walo | null = await local.findById(ID);
 
@@ -45,7 +46,7 @@ async function main() {
             temporaryBlacklisted.push({
               time: +new Date(),
               ID: ID,
-              again: 0,
+              again: 0
             });
           } else {
             temporaryBlacklisted.find((x) => x.ID == ID)!.again++; // SE LO TROVA ANCORA LO INCRENENTA
