@@ -27,6 +27,12 @@ async function main() {
     // }
     // await sleep(5);
 
+    // al primo avvio si resettano i valori locali
+    const localWalos: Walo[] | null = await local.getWalos();
+    for (const item of localWalos!) {
+      await local.stopById(item.ID);
+    }
+
     setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000) // ! Controllo della blacklist ogni 11 secondi
 
     while (true) {
