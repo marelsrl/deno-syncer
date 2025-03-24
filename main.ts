@@ -7,7 +7,7 @@ const makeBlacklist =
   (args.length >= 1 && parseInt(args[2]) == 1) || args.length == 2;
 const BLACKLIST_CHECK_RATE_SECS = 11;
 const MAIN_CYCLE_REFRESH_RATE_SECS = 15;
-let temporaryBlacklisted: Blacklisted[] = [];
+const temporaryBlacklisted: Blacklisted[] = [];
 
 const external = new Database("10.150.126.98");
 const local = new Database("localhost");
@@ -62,17 +62,22 @@ async function main() {
 main();
 
 async function blacklistCheck() {
-  const currentTime: number = +new Date();
+  // const currentTime: number = +new Date();
 
   // ! Controllo degli elementi nella lista ogni 5 secondi
-  for (const x of temporaryBlacklisted) {
-    const elapsedTime: number = (currentTime - +new Date(x.time)) / 1000; // in secondi
-    if (elapsedTime >= 30) {
-      await local.stopById(x.ID);
-    }
+  for (let i :number= 0; i< temporaryBlacklisted.length; i++) {
+    const x = temporaryBlacklisted[i];
+
+    // const elapsedTime: number = (currentTime - +new Date(x.time)) / 1000; // in secondi
+    // if (elapsedTime >= 30) {
+    //   await local.stopById(x.ID);
+
+    // }
     if (x.again > 5) {
-      // se lo trova più di 5 volte lo droppa anche dal server principale
+      // ! se lo trova più di 5 volte lo droppa anche dal server principale
       await external.stopById(x.ID);
+      await local.stopById(x.ID);
+      temporaryBlacklisted.splice(i, 1); // Rimuove l'elemento dalla lista
     }
   }
 
