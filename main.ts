@@ -36,40 +36,44 @@ async function main() {
     // await sleep(5);
 
     // al primo avvio si resettano i valori locali
-    const localWalos: Walo[] | null = await local.getWalos();
-    for (const item of localWalos!) {
-      await local.stopById(item.ID,item.TESTO1);
-    }
+    // const localWalos: Walo[] | null = await local.getWalos();
+    // for (const item of localWalos!) {
+    //   await local.stopById(item.ID,item.TESTO1);
+    // }
 
-    setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000) // ! Controllo della blacklist ogni 11 secondi
+    // setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000) // ! Controllo della blacklist ogni 11 secondi
 
     while (true) {
-      let changed: Walo[] | null = await external.getWalos()!; // prendere i walos
-      // const oks: Walo[] = filterWalos(changed!); //
-      changed = changed?.filter(x=>!avoid.includes(x.ID))!
-
+      const changed: Walo[] | null = await external.getWalos()!; // prendere i walos
       
+      // const oks: Walo[] = filterWalos(changed!); //
+      // changed = changed?.filter(x=>!avoid.includes(x.ID))!
       
       for (const item of changed!) {
         
         const { ID,TESTO1 } = item;
         const found: Walo | null = await local.findById(ID);
-
-        if (found) {
-          // ! se non si trova nalla blacklist si inserisce
-          // ! se si trova si aggiorna again
-          if (!temporaryBlacklisted.find((x) => x.ID == ID)) {
-            await local.updateById(item);
-            temporaryBlacklisted.push({
-              time: +new Date(),
-              ID: ID,
-              again: 0,
-              name:TESTO1
-            });
-          } else {
-            temporaryBlacklisted.find((x) => x.ID == ID)!.again++; // SE LO TROVA ANCORA LO INCRENENTA
-          }
+        
+        if(found){
+          await local.updateById(item);
+          await local.stopById(ID,TESTO1);
         }
+
+        // if (found) {
+        //   // ! se non si trova nalla blacklist si inserisce
+        //   // ! se si trova si aggiorna again
+        //   if (!temporaryBlacklisted.find((x) => x.ID == ID)) {
+        //     await local.updateById(item);
+        //     temporaryBlacklisted.push({
+        //       time: +new Date(),
+        //       ID: ID,
+        //       again: 0,
+        //       name:TESTO1
+        //     });
+        //   } else {
+        //     temporaryBlacklisted.find((x) => x.ID == ID)!.again++; // SE LO TROVA ANCORA LO INCRENENTA
+        //   }
+        // }
       }
       await sleep(MAIN_CYCLE_REFRESH_RATE_SECS);
     }

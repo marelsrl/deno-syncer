@@ -68,5 +68,5 @@ export interface Blacklisted {
 export interface Walo {
     ID: string;
     TESTO1:string
-     PREZZO:string
+     PREZZO:string,
 }
