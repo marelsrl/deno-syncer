@@ -78,10 +78,10 @@ class Database {
     }
   }
 
-  async stopById(id: string): Promise<void> {
+  async stopById(id: string,name:string): Promise<void> {
     if (!this.pool) return;
     try {
-      logger.info(`[${this.server}] 🛑 Fermando ID ${id}`);
+      logger.info(`[${this.server}] 🛑 Fermando ID ${id} -> ${name}`);
 
       const numericId = typeof id === "string" ? parseInt(id, 10) : id;
 

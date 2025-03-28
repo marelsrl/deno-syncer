@@ -1,6 +1,14 @@
-import { filterWalos, sleep, logger, Blacklisted, Walo } from "./utils.ts";
+import {  sleep, logger, Blacklisted, Walo } from "./utils.ts";
 
 import Database from "./database.ts";
+
+
+const dynamicBlacklist = {
+
+}
+
+const avoid:string[] = [];
+
 
 const args = Deno.args;
 const makeBlacklist =
@@ -30,18 +38,21 @@ async function main() {
     // al primo avvio si resettano i valori locali
     const localWalos: Walo[] | null = await local.getWalos();
     for (const item of localWalos!) {
-      await local.stopById(item.ID);
+      await local.stopById(item.ID,item.TESTO1);
     }
 
     setInterval(blacklistCheck, BLACKLIST_CHECK_RATE_SECS * 1000) // ! Controllo della blacklist ogni 11 secondi
 
     while (true) {
-      const changed: Walo[] | null = await external.getWalos()!; // prendere i walos
+      let changed: Walo[] | null = await external.getWalos()!; // prendere i walos
       // const oks: Walo[] = filterWalos(changed!); //
+      changed = changed?.filter(x=>!avoid.includes(x.ID))!
 
       
+      
       for (const item of changed!) {
-        const { ID } = item;
+        
+        const { ID,TESTO1 } = item;
         const found: Walo | null = await local.findById(ID);
 
         if (found) {
@@ -52,7 +63,8 @@ async function main() {
             temporaryBlacklisted.push({
               time: +new Date(),
               ID: ID,
-              again: 0
+              again: 0,
+              name:TESTO1
             });
           } else {
             temporaryBlacklisted.find((x) => x.ID == ID)!.again++; // SE LO TROVA ANCORA LO INCRENENTA
@@ -82,9 +94,27 @@ async function blacklistCheck() {
     // }
     if (x.again > 5) {
       // ! se lo trova più di 5 volte lo droppa anche dal server principale
-      await external.stopById(x.ID);
-      await local.stopById(x.ID);
+      await external.stopById(x.ID,x.name);
+      await local.stopById(x.ID,x.name);
       temporaryBlacklisted.splice(i, 1); // Rimuove l'elemento dalla lista
+
+      if(!avoid.includes(x.ID)){
+        if(Object.keys(dynamicBlacklist).includes(x.ID)){
+          //@ts-ignore
+          dynamicBlacklist[x.ID]++;
+  
+        }else{
+          //@ts-ignore
+          dynamicBlacklist[x.ID] = 0;
+        }
+                      //@ts-ignore
+      if(dynamicBlacklist[x.ID] >= 5){
+          logger.info(`add ${x.ID} to dynamicBlacklist`);
+          avoid.push(x.ID);
+      }
+      }
+
+
     }
   }
 
@@ -94,5 +124,5 @@ async function blacklistCheck() {
 
   //   return elapsedTime < 30; // Mantieni solo quelli che sono stati aggiunti meno di 1 minuto fa
   // });
-  logger.info(`Temporary Blacklisted: ${temporaryBlacklisted}`);
+  logger.info(`Temporary Blacklisted: ${JSON.stringify(temporaryBlacklisted)}`);
 }
